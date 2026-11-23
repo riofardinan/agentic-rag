@@ -1,22 +1,16 @@
-from langchain_ollama import ChatOllama
-from ollama import Client
+from google import genai
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 from assistant import config
 
 
-def ollama_headers() -> dict:
-    return {"Authorization": f"Bearer {config.OLLAMA_API_KEY}"}
-
-
-def get_llm() -> ChatOllama:
-    return ChatOllama(
+def get_llm() -> ChatGoogleGenerativeAI:
+    return ChatGoogleGenerativeAI(
         model=config.MODEL,
-        temperature=config.TEMPERATURE,
-        reasoning=False,  # mode berpikir tidak menambah ketepatan, tetapi jauh lebih lambat
-        base_url=config.OLLAMA_CLOUD_URL,
-        client_kwargs={"headers": ollama_headers()},
+        thinking_level=config.THINKING_LEVEL,
+        google_api_key=config.GOOGLE_API_KEY,
     )
 
 
-def get_ollama_client() -> Client:
-    return Client(host=config.OLLAMA_CLOUD_URL, headers=ollama_headers())
+def get_google_client() -> genai.Client:
+    return genai.Client(api_key=config.GOOGLE_API_KEY)

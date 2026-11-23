@@ -95,7 +95,7 @@ def run_assistant(graph_input):
         st.session_state.pending_leave = state.interrupts[0].value
         answer = "Sebelum saya ajukan, tolong cek detail cuti di bawah ini."
     else:
-        answer = state.values["messages"][-1].content or EMPTY_ANSWER
+        answer = state.values["messages"][-1].text or EMPTY_ANSWER
 
     add_message("assistant", answer, steps)
     st.rerun()
@@ -103,9 +103,8 @@ def run_assistant(graph_input):
 
 # ---------- Persiapan ----------
 
-if not config.OLLAMA_API_KEY or not config.GOOGLE_API_KEY:
-    st.error("OLLAMA_API_KEY dan GOOGLE_API_KEY harus diisi. Salin `.env.example` menjadi `.env`, "
-             "lalu isi kedua API key (lihat README).")
+if not config.GOOGLE_API_KEY:
+    st.error("GOOGLE_API_KEY harus diisi. Salin `.env.example` menjadi `.env`, lalu isi API key-nya (lihat README).")
     st.stop()
 
 if not config.INDEX_DIR.exists():

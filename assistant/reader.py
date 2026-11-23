@@ -2,9 +2,10 @@ import io
 from pathlib import Path
 
 import pypdfium2
+from google.genai import types
 
 from assistant import config
-from assistant.llm import get_ollama_client
+from assistant.llm import get_google_client
 from assistant.prompts import READ_PAGE_PROMPT
 
 
@@ -18,10 +19,14 @@ def render_page(pdf: Path, page_number: int) -> bytes:
 
 
 def read_page(image: bytes) -> str:
-    response = get_ollama_client().chat(
+    # Client disimpan di variabel. Client yang tidak disimpan langsung ditutup sebelum request dikirim.
+    client = get_google_client()
+    response = client.models.generate_content(
         model=config.MODEL,
-        think=False,
-        options={"temperature": config.TEMPERATURE, "num_predict": config.PAGE_MAX_TOKENS},
-        messages=[{"role": "user", "content": READ_PAGE_PROMPT, "images": [image]}],
+        contents=[types.Part.from_bytes(data=image, mime_type="image/png"), READ_PAGE_PROMPT],
+        config=types.GenerateContentConfig(
+            max_output_tokens=config.PAGE_MAX_TOKENS,
+            thinking_config=types.ThinkingConfig(thinking_level=config.THINKING_LEVEL),
+        ),
     )
-    return response.message.content.strip()
+    return response.text.strip()

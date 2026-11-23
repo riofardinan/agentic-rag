@@ -28,7 +28,7 @@ class Grade(BaseModel):
 
 llm = get_llm()
 agent_llm = llm.bind_tools(TOOLS)
-# function_calling dipakai karena berjalan di Ollama lokal maupun Ollama Cloud
+# Penilaian diminta sebagai pemanggilan fungsi, cara yang sama dengan agent memanggil tool
 grader_llm = llm.with_structured_output(Grade, method="function_calling")
 
 
@@ -76,7 +76,7 @@ def grade_documents(state: State) -> Command[Literal["agent", "rewrite_question"
 
 def rewrite_question(state: State):
     query, _ = get_last_search(state["messages"])
-    new_query = llm.invoke(REWRITE_PROMPT.format(query=query)).content.strip()
+    new_query = llm.invoke(REWRITE_PROMPT.format(query=query)).text.strip()
     message = HumanMessage(f"Hasil pencarian untuk '{query}' kurang relevan. Cari lagi dengan kata kunci: {new_query}")
     return {"messages": [message], "rewrite_count": state["rewrite_count"] + 1}
 

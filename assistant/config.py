@@ -5,13 +5,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY", "")
-OLLAMA_CLOUD_URL = "https://ollama.com"
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
 
-# Model Ollama Cloud yang sama dipakai untuk menjawab pertanyaan dan membaca halaman dokumen
-MODEL = "gemma4:31b"
-TEMPERATURE = 0  # jawaban dan hasil baca dibuat konsisten, bukan kreatif
+# Model Gemini API yang sama dipakai untuk menjawab pertanyaan dan membaca halaman dokumen
+MODEL = "gemini-3.5-flash-lite"
+THINKING_LEVEL = "minimal"  # mode berpikir dimatikan: tidak menambah ketepatan, tetapi jauh lebih lambat
 PAGE_MAX_TOKENS = 4096  # batas panjang hasil baca satu halaman
 
 # Membaca dokumen: halaman PDF diubah menjadi gambar sebelum dibaca model

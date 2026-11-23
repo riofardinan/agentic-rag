@@ -1,6 +1,5 @@
 import re
 
-from google import genai
 from google.genai import types
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
@@ -8,6 +7,7 @@ from langchain_qdrant import FastEmbedSparse, QdrantVectorStore, RetrievalMode
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from assistant import config, documents
+from assistant.llm import get_google_client
 
 STRUCK_TEXT = re.compile(r"~~.*?~~", re.DOTALL)
 
@@ -20,7 +20,7 @@ DOCUMENT_PREFIX = "title: none | text: "
 class GeminiEmbeddings(Embeddings):
 
     def __init__(self):
-        self.client = genai.Client(api_key=config.GOOGLE_API_KEY)
+        self.client = get_google_client()
 
     def embed_texts(self, texts: list[str]) -> list[list[float]]:
         # Satu Content untuk setiap teks. Daftar string biasa akan digabung menjadi satu embedding.

@@ -52,5 +52,5 @@ while True:
         answer = input(f"\nAjukan cuti {leave['start_date']} s.d. {leave['end_date']} ({leave['reason']})? (ya/tidak): ")
         run(Command(resume="yes" if answer.lower() == "ya" else "no"))
 
-    answer = graph.get_state(run_config).values["messages"][-1].content
+    answer = graph.get_state(run_config).values["messages"][-1].text
     print(f"\nAsisten: {answer}")
