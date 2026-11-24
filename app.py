@@ -17,7 +17,6 @@ TOOL_LABELS = {
     "create_it_ticket": "Membuat tiket IT",
 }
 EMPTY_ANSWER = "Maaf, saya belum bisa menjawab. Coba ulangi dengan kalimat lain."
-RECENT_CHATS_HEIGHT = 400  # tinggi daftar riwayat (piksel); lebih dari itu daftar bisa di-scroll
 
 
 @st.cache_resource(show_spinner="Menyiapkan asisten...")
@@ -40,8 +39,8 @@ def open_chat(thread_id: str):
     st.session_state.pending_leave = state.interrupts[0].value if state.interrupts else None
 
 
-def switch_account(employee_id: str):
-    st.session_state.employee_id = employee_id
+def switch_account():
+    st.session_state.employee_id = st.session_state.selected_employee
     start_new_chat()
 
 
@@ -120,28 +119,20 @@ if "thread_id" not in st.session_state:
 
 with st.sidebar:
     st.title("Nusa Teknologi")
-    st.button("Percakapan baru", icon=":material/edit_square:", on_click=start_new_chat, width="stretch")
+    st.button("Percakapan baru", on_click=start_new_chat)
 
     st.caption("Riwayat")
     conversations = database.list_conversations(st.session_state.employee_id)
-    with st.container(height=RECENT_CHATS_HEIGHT, border=False, gap=None):
-        if not conversations:
-            st.caption("Belum ada percakapan.")
-        for conversation in conversations:
-            is_open = conversation["thread_id"] == st.session_state.thread_id
-            st.button(conversation["title"], key=conversation["thread_id"], on_click=open_chat,
-                      args=(conversation["thread_id"],), type="secondary" if is_open else "tertiary")
+    if not conversations:
+        st.caption("Belum ada percakapan.")
+    for conversation in conversations:
+        st.button(conversation["title"], key=conversation["thread_id"], on_click=open_chat,
+                  args=(conversation["thread_id"],), disabled=conversation["thread_id"] == st.session_state.thread_id)
 
     # Profil. Di aplikasi perusahaan sungguhan, profil berasal dari login kantor. Di sini akun demo bisa diganti.
-    employees = {employee["id"]: employee for employee in database.list_employees()}
-    employee = employees[st.session_state.employee_id]
-    with st.popover(f"{employee['name']} · {employee['department']}", icon=":material/account_circle:",
-                    type="tertiary"):
-        st.caption("Ganti akun demo")
-        for employee_id, other in employees.items():
-            st.button(f"{other['name']} · {other['department']}", key=f"account-{employee_id}",
-                      on_click=switch_account, args=(employee_id,),
-                      disabled=employee_id == st.session_state.employee_id, width="stretch")
+    employees = {employee["id"]: f"{employee['name']} · {employee['department']}" for employee in database.list_employees()}
+    st.selectbox("Akun demo", employees, format_func=employees.get, key="selected_employee",
+                 index=list(employees).index(st.session_state.employee_id), on_change=switch_account)
 
 # ---------- Chat ----------
 
@@ -171,11 +162,10 @@ if st.session_state.pending_leave:
         st.markdown(f"**Konfirmasi pengajuan cuti**\n\n"
                     f"- Tanggal: {leave['start_date']} s.d. {leave['end_date']}\n"
                     f"- Alasan: {leave['reason']}")
-        col_yes, col_no = st.columns(2)
         decision = None
-        if col_yes.button("Ya, ajukan", type="primary", width="stretch"):
+        if st.button("Ya, ajukan"):
             decision = "yes"
-        if col_no.button("Batal", width="stretch"):
+        if st.button("Batal"):
             decision = "no"
 
     if decision:
